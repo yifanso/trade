@@ -1,0 +1,72 @@
+# 编译相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 分发相关
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# 数据和结果
+data/
+results/
+logs/
+*.csv
+*.xlsx
+*.db
+*.sqlite
+
+# 缓存
+.cache/
+*.cache
+.qlib/
+
+# 配置敏感信息
+config/local_config.yaml
+config/credentials.json
+
+# 临时文件
+*.tmp
+*.bak
+*.log.*

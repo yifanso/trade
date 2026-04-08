@@ -1,0 +1,44 @@
+# QLib量化回测配置文件
+
+# 数据配置
+data:
+  qlib_data_path: ~/.qlib/qlib_data
+  cache_dir: ~/.cache/qlib_backtest
+  stocks:
+    - "000001.SZ"  # 平安银行
+    - "000858.SZ"  # 五粮液
+    - "600000.SH"  # 浦发银行
+  start_date: "2020-01-01"
+  end_date: "2023-12-31"
+  freq: "day"
+
+# 特征配置
+features:
+  momentum:
+    windows: [5, 10, 20]
+  volatility:
+    windows: [10, 20]
+  trend:
+    windows: [5, 10, 20]
+  volume:
+    windows: [5, 20]
+
+# 策略配置
+strategy:
+  type: "momentum"  # momentum, mean_reversion, or combined
+  parameters:
+    short_window: 5
+    long_window: 20
+    threshold: 0.02
+
+# 回测配置
+backtest:
+  initial_capital: 1000000.0
+  commission: 0.001
+  slippage: 0.0001
+  max_position_per_stock: 0.3
+
+# 输出配置
+output:
+  results_dir: ./results
+  logs_dir: ./logs
