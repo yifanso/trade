@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>量化回测执行</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>量化回测执行</h1>
+            <p>配置回测参数并立即运行策略回测。</p>
+            <nav>
+                <a href="/">首页</a> |
+                <a href="/download">下载股票数据</a> |
+                <a href="/backtest">执行回测</a>
+            </nav>
+        </header>
+
+        <section class="download-form">
+            {% if error %}
+                <div class="alert">{{ error }}</div>
+            {% endif %}
+
+            <form method="post">
+                <label for="stock_codes">股票代码</label>
+                <input id="stock_codes" name="stock_codes" type="text" placeholder="例如：000001.SZ, 600000.SH" required />
+
+                <label for="start_date">开始日期</label>
+                <input id="start_date" name="start_date" type="date" required />
+
+                <label for="end_date">结束日期</label>
+                <input id="end_date" name="end_date" type="date" required />
+
+                <label for="freq">数据频率</label>
+                <select id="freq" name="freq">
+                    <option value="day">日线</option>
+                    <option value="week">周线</option>
+                    <option value="month">月线</option>
+                </select>
+
+                <label for="strategy">策略类型</label>
+                <select id="strategy" name="strategy">
+                    <option value="momentum" {% if strategy_name == 'momentum' %}selected{% endif %}>Momentum</option>
+                    <option value="mean_reversion" {% if strategy_name == 'mean_reversion' %}selected{% endif %}>Mean Reversion</option>
+                </select>
+
+                <div class="strategy-params">
+                    <div>
+                        <label for="short_window">短期窗口</label>
+                        <input id="short_window" name="short_window" type="number" min="1" value="5" />
+                    </div>
+                    <div>
+                        <label for="long_window">长期窗口</label>
+                        <input id="long_window" name="long_window" type="number" min="1" value="20" />
+                    </div>
+                    <div>
+                        <label for="threshold">阈值</label>
+                        <input id="threshold" name="threshold" type="number" step="0.01" value="0.02" />
+                    </div>
+                    <div>
+                        <label for="window">均值窗口</label>
+                        <input id="window" name="window" type="number" min="1" value="20" />
+                    </div>
+                    <div>
+                        <label for="std_multiple">标准差倍数</label>
+                        <input id="std_multiple" name="std_multiple" type="number" step="0.1" value="2" />
+                    </div>
+                </div>
+
+                <button type="submit">执行回测</button>
+            </form>
+
+            <p class="hint">提示：策略参数可根据所选策略调整，回测结果会保存到 <code>results/</code>。</p>
+        </section>
+
+        {% if metrics %}
+            <section class="metrics">
+                <h2>回测结果</h2>
+                <table>
+                    <tbody>
+                        {% for key, value in metrics.items() %}
+                            <tr>
+                                <td>{{ key.replace('_', ' ') | title }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if export_name %}
+                    <p>回测结果已导出为：<strong>{{ export_name }}_summary.json</strong></p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <footer>
+            <p>回测执行将根据当前配置生成信号并计算性能指标。</p>
+        </footer>
+    </div>
+</body>
+</html>

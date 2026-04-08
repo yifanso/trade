@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>股票数据下载</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>股票数据下载</h1>
+            <p>输入股票代码和时间范围，下载对应的 OHLCV 数据。</p>
+            <nav>
+                <a href="/">首页</a> |
+                <a href="/download">下载股票数据</a>
+            </nav>
+        </header>
+
+        <section class="download-form">
+            {% if error %}
+                <div class="alert">{{ error }}</div>
+            {% endif %}
+
+            <form method="post">
+                <label for="stock_codes">股票代码</label>
+                <input id="stock_codes" name="stock_codes" type="text" placeholder="例如：000001.SZ, 600000.SH" required />
+
+                <label for="start_date">开始日期</label>
+                <input id="start_date" name="start_date" type="date" required />
+
+                <label for="end_date">结束日期</label>
+                <input id="end_date" name="end_date" type="date" required />
+
+                <label for="freq">数据频率</label>
+                <select id="freq" name="freq">
+                    <option value="day">日线</option>
+                    <option value="week">周线</option>
+                    <option value="month">月线</option>
+                </select>
+
+                <button type="submit">下载 CSV</button>
+            </form>
+
+            <p class="hint">提示：如果未安装 QLib，将使用模拟数据生成。</p>
+        </section>
+
+        <footer>
+            <p>下载完成后，CSV 文件将直接保存到你的浏览器下载目录。</p>
+        </footer>
+    </div>
+</body>
+</html>

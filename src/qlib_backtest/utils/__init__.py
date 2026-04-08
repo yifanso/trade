@@ -153,6 +153,7 @@ class ResultsExporter:
             trades_df.to_csv(trades_file, index=False)
         
         logging.info(f"结果已导出到: {self.output_dir}")
+        return base_name
 
 
 import pandas as pd

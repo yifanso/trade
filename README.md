@@ -149,13 +149,26 @@ python examples/advanced_backtest.py
 python examples/web_frontend.py
 ```
 
-## 前端仪表盘
+## 前端页面
 
-项目包含一个简单的 Flask 前端页面，展示 `results/` 目录中的最新回测汇总结果。启动后访问:
+项目包含一个简单的 Flask 前端：
 
-```bash
-http://localhost:5000
-```
+- `http://localhost:5000/`：回测结果仪表盘
+- `http://localhost:5000/download`：股票数据下载页面
+- `http://localhost:5000/backtest`：量化回测执行页面
+
+### 下载股票数据
+1. 访问 `http://localhost:5000/download`
+2. 输入股票代码、开始日期、结束日期
+3. 选择频率后点击“下载 CSV”
+
+### 执行回测
+1. 访问 `http://localhost:5000/backtest`
+2. 输入股票代码、日期范围
+3. 选择策略并调整参数
+4. 点击“执行回测”并查看回测指标
+
+> 如果未安装 QLib，系统会回退到模拟数据生成，以便快速验证页面功能。
 
 ## 核心模块说明
 

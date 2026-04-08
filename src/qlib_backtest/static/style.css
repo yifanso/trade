@@ -26,6 +26,71 @@ h2 {
   font-size: 1.3rem;
 }
 
+nav {
+  margin-top: 12px;
+}
+
+nav a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+.download-form {
+  margin-top: 24px;
+}
+
+.download-form form {
+  display: grid;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.download-form label {
+  font-weight: 600;
+}
+
+.download-form input,
+.download-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.download-form button {
+  width: fit-content;
+  padding: 10px 18px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.download-form button:hover {
+  background: #1d4ed8;
+}
+
+.alert {
+  padding: 12px 16px;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  border-radius: 8px;
+}
+
+.hint {
+  margin-top: 12px;
+  color: #4b5563;
+}
+
 .summary-list ul {
   list-style: none;
   padding-left: 0;
