@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QLib 回测前端</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QLib 回测结果仪表盘</h1>
+            <p>显示最近导出的回测结果汇总与性能指标。</p>
+        </header>
+
+        <section class="summary-list">
+            <h2>可用结果文件</h2>
+            {% if summaries %}
+                <ul>
+                    {% for name in summaries %}
+                        <li>
+                            {% if name == active_name %}
+                                <strong>{{ name }}</strong>
+                            {% else %}
+                                <a href="/results/{{ name }}">{{ name }}</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>暂无回测结果文件。请先运行回测并导出结果到 <code>results/</code>。</p>
+            {% endif %}
+        </section>
+
+        <section class="metrics">
+            <h2>回测指标</h2>
+            {% if active_summary %}
+                <table>
+                    <tbody>
+                        {% for key, value in active_summary.items() %}
+                            <tr>
+                                <td>{{ key.replace('_', ' ') | title }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>当前没有可显示的回测结果。</p>
+            {% endif %}
+        </section>
+
+        <footer>
+            <p>启动示例: <code>python examples/web_frontend.py</code></p>
+        </footer>
+    </div>
+</body>
+</html>

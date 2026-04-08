@@ -144,6 +144,17 @@ python examples/basic_backtest.py
 
 # 高级示例（包含组合策略）
 python examples/advanced_backtest.py
+
+# 启动前端页面
+python examples/web_frontend.py
+```
+
+## 前端仪表盘
+
+项目包含一个简单的 Flask 前端页面，展示 `results/` 目录中的最新回测汇总结果。启动后访问:
+
+```bash
+http://localhost:5000
 ```
 
 ## 核心模块说明
