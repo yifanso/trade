@@ -8,6 +8,7 @@
 - 集成微软QLib库的强大数据处理能力
 - 自动数据清洗和特征提取
 - 支持多股票多周期数据加载
+- ⭐ **新增：定期自动下载数据** - 定时从QLib更新交易数据
 
 ✅ **灵活的特征工程**
 - 技术指标计算（RSI、MACD、动量等）
@@ -147,7 +148,77 @@ python examples/advanced_backtest.py
 
 # 启动前端页面
 python examples/web_frontend.py
+
+# 快速入门数据定期下载 (推荐)
+python examples/quick_data_download.py
 ```
+
+## ⭐ 新功能：定期数据下载
+
+自动定期从QLib下载和更新交易数据，无需手动操作！
+
+### 快速开始
+
+```python
+from src.qlib_backtest.data.downloader import DataDownloader
+
+# 创建下载器
+downloader = DataDownloader()
+
+# 启动定时任务（每个工作日下午4点更新）
+downloader.start_scheduler(
+    stock_codes=["000858.SZ", "000651.SZ"],
+    cron_expression="0 16 * * 1-5",  # 工作日下午4点
+    incremental=True,  # 只下载新的数据
+)
+
+print("✓ 定时下载已启动！数据会在后台自动更新")
+```
+
+### 主要特性
+
+✨ **定时自动下载** - 支持Cron表达式，灵活配置更新时间  
+✨ **增量更新** - 智能检测上次下载时间，只更新新数据  
+✨ **批量处理** - 支持监控多个股票  
+✨ **完整日志** - SQLite数据库记录所有操作  
+✨ **后台运行** - 独立线程，不阻塞主程序  
+
+### 详细文档
+
+👉 [完整数据下载指南](DATA_DOWNLOAD_GUIDE.md) - 详细API和高级用法
+
+### 常见用法
+
+```python
+from src.qlib_backtest.data.downloader import DataDownloader, DataUpdateManager
+
+# 方法1: 单次下载
+downloader = DataDownloader()
+results = downloader.download_data("000858.SZ", start_date="2024-01-01")
+
+# 方法2: 增量更新（自动检测上次日期）
+downloader.download_data("000858.SZ", incremental=True)
+
+# 方法3: 使用管理器（推荐）
+manager = DataUpdateManager(downloader)
+manager.add_stocks(["000858.SZ", "000651.SZ"])
+manager.start_monitoring(cron_expression="0 16 * * 1-5")
+
+# 方法4: 查看状态
+stats = downloader.get_download_statistics()
+print(f"已下载 {stats['unique_stocks']} 只股票，成功率 {stats['successful']}/{stats['total_downloads']}")
+```
+
+### Cron表达式示例
+
+| 表达式 | 含义 |
+|-------|------|
+| `0 16 * * 1-5` | 每个工作日下午4点（股市收盘后）✓ 推荐 |
+| `0 9 * * *` | 每天上午9点 |
+| `0 9,15 * * *` | 每天上午9点和下午3点 |
+| `*/30 * * * *` | 每30分钟 |
+
+👉 更详细内容见 [数据下载完整指南](DATA_DOWNLOAD_GUIDE.md)
 
 ## 前端页面
 

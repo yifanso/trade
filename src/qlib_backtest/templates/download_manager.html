@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数据下载管理</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+        .download-section {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .trigger-form {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .trigger-form label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: 600;
+        }
+
+        .trigger-form input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .status-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-value {
+            color: #666;
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: white;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .result-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .hint-text {
+            color: #666;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📥 数据下载管理</h1>
+            <p>管理从QLib定期下载交易数据，支持手动触发和自动更新。</p>
+            <nav>
+                <a href="/">首页</a> |
+                <a href="/download">下载股票数据</a> |
+                <a href="/backtest">执行回测</a>
+            </nav>
+        </header>
+
+        {% if error %}
+            <div class="message error">❌ 错误: {{ error }}</div>
+        {% endif %}
+
+        <!-- 下载触发部分 -->
+        <section class="download-section">
+            <h2>🚀 立即触发下载</h2>
+            <div class="trigger-form">
+                <label for="stock_codes">股票代码</label>
+                <input 
+                    id="stock_codes" 
+                    type="text" 
+                    placeholder="例如：000858.SZ, 000651.SZ, 600519.SH (逗号分隔)"
+                    value="000858.SZ, 000651.SZ, 600519.SH"
+                />
+                <p class="hint-text">💡 输入多个股票代码，使用逗号或中文分号分隔。支持增量更新，只下载最新数据。</p>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="triggerDownload()">
+                        <span id="btn-text">立即触发下载</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearMessage()">
+                        清除消息
+                    </button>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>正在下载中，请稍候...</p>
+                </div>
+
+                <div id="message" class="message"></div>
+
+                <div id="results"></div>
+            </div>
+        </section>
+
+        <!-- 下载状态部分 -->
+        <section class="download-section">
+            <h2>📊 下载状态</h2>
+            <div class="status-box">
+                {% if status %}
+                    <div class="status-item">
+                        <span class="status-label">定时下载器状态</span>
+                        <span class="status-value">
+                            {% if status.running %}
+                                <span class="badge badge-success">✓ 活跃</span>
+                            {% else %}
+                                <span class="badge badge-warning">○ 未运行</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">调度器状态</span>
+                        <span class="status-value">
+                            {% if status.scheduler_active %}
+                                <span class="badge badge-success">✓ 启动</span>
+                            {% else %}
+                                <span class="badge badge-warning">○ 停止</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">最近下载记录</span>
+                        <span class="status-value">
+                            <span class="badge badge-info">{{ status.recent_downloads|length }} 条</span>
+                        </span>
+                    </div>
+                {% else %}
+                    <p>暂无下载状态信息</p>
+                {% endif %}
+            </div>
+
+            {% if status.recent_downloads %}
+                <h3>最近的下载</h3>
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>股票代码</th>
+                            <th>最后更新</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in status.recent_downloads[:10] %}
+                            <tr>
+                                <td><strong>{{ item.stock_code }}</strong></td>
+                                <td>{{ item.last_date or 'N/A' }}</td>
+                                <td>
+                                    {% if item.status == 'success' %}
+                                        <span class="badge badge-success">✓ 成功</span>
+                                    {% elif item.status == 'warning' %}
+                                        <span class="badge badge-warning">⚠ 警告</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">✗ 失败</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </section>
+
+        <!-- 统计信息部分 -->
+        <section class="download-section">
+            <h2>📈 下载统计</h2>
+            <div class="status-box">
+                {% if stats %}
+                    <div class="status-item">
+                        <span class="status-label">监控的股票数</span>
+                        <span class="status-value"><strong>{{ stats.get('unique_stocks', 0) }}</strong></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">总下载次数</span>
+                        <span class="status-value"><strong>{{ stats.get('total_downloads', 0) }}</strong></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">成功次数</span>
+                        <span class="status-value">
+                            <span class="badge badge-success">{{ stats.get('successful', 0) }}</span>
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">失败次数</span>
+                        <span class="status-value">
+                            <span class="badge badge-danger">{{ stats.get('failed', 0) }}</span>
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">平均下载耗时</span>
+                        <span class="status-value"><strong>{{ "%.1f"|format(stats.get('avg_duration_seconds', 0)) }}</strong> 秒</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">最后更新时间</span>
+                        <span class="status-value">{{ stats.get('last_download', 'N/A') }}</span>
+                    </div>
+                {% else %}
+                    <p>暂无统计数据</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- 使用提示 -->
+        <section class="download-section">
+            <h2>💡 使用提示</h2>
+            <ul style="line-height: 1.8; color: #555;">
+                <li><strong>增量更新</strong>：每次下载会自动从上次日期继续更新，大大加快下载速度</li>
+                <li><strong>批量管理</strong>：支持同时监控多个股票，使用逗号或中文分号分隔</li>
+                <li><strong>完整日志</strong>：所有下载操作都记录在数据库中，可以查看历史</li>
+                <li><strong>数据存储</strong>：下载的数据保存在本地缓存目录：<code>~/.cache/qlib_backtest/</code></li>
+                <li><strong>定时更新</strong>：配合定时任务使用，可以实现完全自动化的数据更新</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>更多信息请查看: <a href="/download">下载页面</a> | <a href="/backtest">回测页面</a></p>
+        </footer>
+    </div>
+
+    <script>
+        async function triggerDownload() {
+            const stockCodesInput = document.getElementById('stock_codes').value;
+            const button = event.target;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            const results = document.getElementById('results');
+
+            if (!stockCodesInput.trim()) {
+                showMessage('请输入要下载的股票代码', 'error');
+                return;
+            }
+
+            // 禁用按钮并显示加载状态
+            button.disabled = true;
+            button.textContent = '下载中...';
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/trigger-download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stock_codes: stockCodesInput
+                    })
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (data.status === 'success') {
+                    showMessage(
+                        `✓ ${data.message} (${data.successful}/${data.total})`,
+                        'success'
+                    );
+
+                    // 显示详细结果
+                    if (data.details) {
+                        let resultHtml = '<h3 style="margin-top: 15px;">下载详情</h3><table class="result-table"><thead><tr><th>股票代码</th><th>记录数</th><th>状态</th></tr></thead><tbody>';
+                        
+                        for (const [code, detail] of Object.entries(data.details)) {
+                            const statusBadge = detail.success 
+                                ? `<span class="badge badge-success">✓ 成功</span>` 
+                                : `<span class="badge badge-danger">✗ 失败</span>`;
+                            resultHtml += `<tr><td>${code}</td><td>${detail.records}</td><td>${statusBadge}</td></tr>`;
+                        }
+                        resultHtml += '</tbody></table>';
+                        results.innerHTML = resultHtml;
+                    }
+
+                    // 刷新页面数据
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showMessage(`✗ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showMessage(`✗ 请求失败: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = '立即触发下载';
+            }
+        }
+
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+        }
+
+        function clearMessage() {
+            document.getElementById('message').className = 'message';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // 页面加载时检查状态
+        function refreshStatus() {
+            fetch('/api/download-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 可以在这里更新页面状态
+                        console.log('Status updated:', data);
+                    }
+                })
+                .catch(error => console.error('Failed to refresh status:', error));
+        }
+
+        // 每30秒刷新一次状态
+        setInterval(refreshStatus, 30000);
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import json
 from io import BytesIO
 from pathlib import Path
-from flask import Flask, render_template, abort, request, send_file
+from flask import Flask, render_template, abort, request, send_file, jsonify
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 TEMPLATE_FOLDER = PACKAGE_ROOT / "templates"
@@ -196,6 +196,98 @@ def backtest_page():
         export_name=export_name,
         strategy_name=strategy_name,
     )
+
+
+@app.route("/api/trigger-download", methods=["POST"])
+def trigger_download():
+    """触发数据下载API"""
+    try:
+        from qlib_backtest.data.downloader import DataDownloader
+        
+        stock_codes = request.json.get("stock_codes", [])
+        if isinstance(stock_codes, str):
+            stock_codes = parse_stock_codes(stock_codes)
+        
+        if not stock_codes:
+            return jsonify({
+                "status": "error",
+                "message": "请指定要下载的股票代码"
+            }), 400
+        
+        downloader = DataDownloader()
+        results = downloader.download_data(
+            stock_codes=stock_codes,
+            incremental=True,
+        )
+        
+        successful = sum(1 for df in results.values() if df is not None)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"成功下载 {successful}/{len(stock_codes)} 只股票",
+            "successful": successful,
+            "total": len(stock_codes),
+            "details": {
+                code: {
+                    "records": len(df) if df is not None else 0,
+                    "success": df is not None
+                }
+                for code, df in results.items()
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"下载失败: {str(e)}"
+        }), 500
+
+
+@app.route("/api/download-status", methods=["GET"])
+def download_status():
+    """获取下载器状态API"""
+    try:
+        from qlib_backtest.data.downloader import DataDownloader
+        
+        downloader = DataDownloader()
+        status = downloader.get_download_status()
+        stats = downloader.get_download_statistics()
+        
+        return jsonify({
+            "status": "success",
+            "running": status.get('running', False),
+            "scheduler_active": status.get('scheduler_active', False),
+            "recent_downloads": status.get('recent_downloads', []),
+            "statistics": stats
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+@app.route("/download-manager", methods=["GET"])
+def download_manager_page():
+    """下载管理页面"""
+    try:
+        from qlib_backtest.data.downloader import DataDownloader
+        
+        downloader = DataDownloader()
+        status = downloader.get_download_status()
+        stats = downloader.get_download_statistics()
+        
+        return render_template(
+            "download_manager.html",
+            status=status,
+            stats=stats,
+        )
+    except Exception as e:
+        return render_template(
+            "download_manager.html",
+            error=str(e),
+        )
 
 
 if __name__ == "__main__":

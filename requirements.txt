@@ -15,3 +15,6 @@ requests>=2.26.0
 python-dateutil>=2.8.0
 joblib>=1.1.0
 Flask>=2.2.0
+
+# 定期数据下载依赖
+apscheduler>=3.10.0  # 用于定时任务
