@@ -271,23 +271,28 @@ def download_status():
 @app.route("/download-manager", methods=["GET"])
 def download_manager_page():
     """下载管理页面"""
+    # 默认状态和统计数据
+    status = {"scheduler_running": False, "monitored_stocks": [], "last_check": None}
+    stats = {"total_downloads": 0, "success_rate": 0, "avg_duration": 0}
+    error = None
+    
     try:
         from qlib_backtest.data.downloader import DataDownloader
         
         downloader = DataDownloader()
         status = downloader.get_download_status()
         stats = downloader.get_download_statistics()
-        
-        return render_template(
-            "download_manager.html",
-            status=status,
-            stats=stats,
-        )
+    except ImportError as e:
+        error = f"模块导入失败: {str(e)}. 请检查 DataDownloader 是否正确安装。"
     except Exception as e:
-        return render_template(
-            "download_manager.html",
-            error=str(e),
-        )
+        error = f"获取下载状态失败: {str(e)}"
+    
+    return render_template(
+        "download_manager.html",
+        status=status,
+        stats=stats,
+        error=error,
+    )
 
 
 if __name__ == "__main__":
