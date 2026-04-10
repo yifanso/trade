@@ -1,7 +1,19 @@
 import json
+import os
+import sys
 from io import BytesIO
 from pathlib import Path
 from flask import Flask, render_template, abort, request, send_file, jsonify
+
+# 确保src目录在Python路径中，以便正确导入qlib_backtest模块
+_src_path = os.path.join(os.path.dirname(__file__), '..', '..')
+if _src_path not in sys.path:
+    sys.path.insert(0, _src_path)
+    
+# 也添加src目录本身
+_src_dir = os.path.join(os.path.dirname(__file__), '..')
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 TEMPLATE_FOLDER = PACKAGE_ROOT / "templates"
